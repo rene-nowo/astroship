@@ -7,7 +7,7 @@ image: {
     alt: "data structures & algorithms"
 }
 publishDate: "2022-11-09 16:39"
-category: "Courses"
+category: "Technology"
 author: "Marcell Ziemann"
 tags: [webdev, tailwindcss, frontend]
 ---

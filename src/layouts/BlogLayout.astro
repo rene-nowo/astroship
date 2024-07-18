@@ -1,49 +1,74 @@
 ---
-import Container from "@components/container.astro";
-import { getFormattedDate } from "@utils/all";
-import Layout from "./Layout.astro";
+import TOC from "@components/TOC.astro";
+import '../styles/global.css';
 
-const { frontmatter } = Astro.props;
+export interface Props {
+  content: {
+    title: string;
+  };
+  headings: {
+    slug: string;
+    text: string;
+    depth: number;
+  }[];
+}
+
+const {
+  content:
+  
+  { title },
+  headings,
+} = Astro.props;
 ---
 
-<Layout title={frontmatter.title}>
-  <Container>
-    <div class="mx-auto max-w-[735px] mt-14">
-      <span class="text-blue-400 uppercase tracking-wider text-sm font-medium">
-        {frontmatter.category}
-      </span>
-      <h1
-        class="text-4xl lg:text-5xl font-bold lg:tracking-tight mt-1 lg:leading-tight">
-        {frontmatter.title}
-      </h1>
-      <div class="flex gap-2 mt-3 items-center flex-wrap md:flex-nowrap">
-        <span class="text-gray-400">
-          {frontmatter.author}
-        </span>
-        <span class="text-gray-400">•</span>
-        <time class="text-gray-400" datetime={frontmatter.publishDate}>
-          {getFormattedDate(frontmatter.publishDate)}
-        </time>
-        <span class="text-gray-400 hidden md:block">•</span>
-        <div class="w-full md:w-auto flex flex-wrap gap-3">
-          {
-            frontmatter.tags.map((tag) => (
-              <span class="text-sm text-gray-500">#{tag}</span>
-            ))
-          }
-        </div>
-      </div>
-    </div>
+<html>
+  <body>
+    <article>
+      {
+        headings && headings.length > 0 && (
+          <div class="absolute right-[-270px] h-full">
+            <nav class="sticky top-8 w-[200px]">
+            <h3>Table of Content</h3>
+            <TOC headings={headings} />
+          </nav>
+          </div>
+          
+        )
+      }
 
-    <div class="mx-auto prose prose-lg mt-6">
-      <slot />
-    </div>
-    <div class="text-center mt-8">
-      <a
-        href="/blog"
-        class="bg-gray-100 px-5 py-3 rounded-md hover:bg-gray-200 transition"
-        >← Back to Blog</a
-      >
-    </div>
-  </Container>
-</Layout>
+      <div class="article-content">
+        <slot />
+      </div>
+    </article>
+  </body>
+</html>
+
+
+<script>
+  addIntersectionObserver();
+
+function addIntersectionObserver()
+{
+  const observer = new IntersectionObserver((sections) => {
+    sections.forEach((section) => {
+      const heading = section.target.querySelector('h2, h3, h4, h5');
+      if (!heading) return;
+      const id = heading.getAttribute('id');
+
+      // Get the link to this section's heading
+      const link = document.querySelector(`nav.article-toc li a[href="#${id}"]`);
+      if (!link) return;
+
+      // Add/remove the .active class based on whether the
+      // section is visible
+      const addRemove = section.intersectionRatio > 0 ? 'add' : 'remove';
+      link.classList[addRemove]('active');
+    });
+  });
+
+  document.querySelectorAll('.article-content section').forEach((section) => {
+    observer.observe(section);
+  })
+}
+
+</script>
